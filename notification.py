@@ -4,7 +4,11 @@ import os
 from datetime import datetime
 from logging.handlers import RotatingFileHandler
 
-import requests
+try:
+    import requests
+    HAS_REQUESTS = True
+except ImportError:
+    HAS_REQUESTS = False
 
 from config import LOG_FILE, AUDIT_LOG_FILE, WECOM_WEBHOOK_URL, DINGTALK_WEBHOOK_URL
 from models import SessionLocal, OperationLog, NotificationRecord
@@ -87,6 +91,15 @@ def send_wecom_notification(title, content, mentioned_mobile_list=None):
             db.commit()
             return False
 
+        if not HAS_REQUESTS:
+            file_logger.warning(
+                f"[企业微信推送] requests库未安装，仅记录本地 | 标题:{title}"
+            )
+            record.is_sent = False
+            record.error_msg = "requests库未安装"
+            db.commit()
+            return False
+
         md_content = f"## **{title}**\n\n{content}\n\n"
         md_content += f"> 推送时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
 
@@ -138,6 +151,15 @@ def send_dingtalk_notification(title, content, at_mobiles=None):
             )
             record.is_sent = False
             record.error_msg = "未配置Webhook URL"
+            db.commit()
+            return False
+
+        if not HAS_REQUESTS:
+            file_logger.warning(
+                f"[钉钉推送] requests库未安装，仅记录本地 | 标题:{title}"
+            )
+            record.is_sent = False
+            record.error_msg = "requests库未安装"
             db.commit()
             return False
 

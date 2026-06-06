@@ -246,6 +246,7 @@ def generate_trend_charts(trend_data: Dict[str, Any], output_dir: str) -> Dict[s
     ax.set_xlabel("月份")
     ax.set_ylabel("平均检测周期 (天)")
     ax.set_title(f"近{trend_data['months']}个月平均检测周期趋势", fontsize=14, fontweight="bold")
+    ax.set_xticks(range(len(periods)))
     ax.set_xticklabels(periods, rotation=45)
 
     for bar, val in zip(bars, avg_cycles):

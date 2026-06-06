@@ -1,3 +1,5 @@
+import uuid
+
 from datetime import datetime
 from typing import List, Dict, Any, Optional
 
@@ -10,17 +12,9 @@ from notification import log_operation, push_alert, write_audit_log
 
 
 def generate_task_code() -> str:
-    db = SessionLocal()
-    try:
-        today_str = datetime.now().strftime("%Y%m%d")
-        pattern = f"{TASK_CODE_PREFIX}{today_str}%"
-        count = db.query(InspectionTask).filter(
-            InspectionTask.task_code.like(pattern)
-        ).count()
-        seq = str(count + 1).zfill(4)
-        return f"{TASK_CODE_PREFIX}{today_str}{seq}"
-    finally:
-        db.close()
+    now_str = datetime.now().strftime("%Y%m%d%H%M%S%f")[:-3]
+    short_uuid = uuid.uuid4().hex[:4].upper()
+    return f"{TASK_CODE_PREFIX}{now_str}{short_uuid}"
 
 
 def select_laboratory(sample_type: str) -> str:

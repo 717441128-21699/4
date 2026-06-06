@@ -1,6 +1,7 @@
 import os
 import json
 import re
+import uuid
 from datetime import datetime
 from typing import Optional, Dict, Any
 
@@ -14,15 +15,9 @@ from notification import log_operation, push_alert, write_audit_log
 
 
 def generate_sample_code() -> str:
-    db = SessionLocal()
-    try:
-        today_str = datetime.now().strftime("%Y%m%d")
-        pattern = f"{SAMPLE_CODE_PREFIX}{today_str}%"
-        count = db.query(Sample).filter(Sample.sample_code.like(pattern)).count()
-        seq = str(count + 1).zfill(4)
-        return f"{SAMPLE_CODE_PREFIX}{today_str}{seq}"
-    finally:
-        db.close()
+    now_str = datetime.now().strftime("%Y%m%d%H%M%S%f")[:-3]
+    short_uuid = uuid.uuid4().hex[:4].upper()
+    return f"{SAMPLE_CODE_PREFIX}{now_str}{short_uuid}"
 
 
 def generate_qr_code(sample_code: str, sample_info: Dict[str, Any]) -> str:
